@@ -232,6 +232,47 @@
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
+
+                <!-- Deployment Info -->
+                <div class="mt-6 pt-6 border-t border-slate-700/50">
+                    <h4 class="text-lg font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-rocket text-amber-500"></i> Центр Деплоя
+                    </h4>
+                    
+                    <div class="grid gap-4">
+                        <!-- Vercel Option (Best) -->
+                        <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-600/50 text-sm text-slate-300">
+                            <div class="flex items-center gap-2 mb-2 font-bold text-white text-base">
+                                <i class="fas fa-triangle-circle-square"></i> Vercel (Рекомендуем)
+                            </div>
+                            <p class="mb-3 text-xs text-slate-400">Самый надежный способ. Требует GitHub аккаунт.</p>
+                            <ol class="list-decimal list-inside space-y-2 ml-1 text-slate-300 text-xs">
+                                <li>Создайте папку на ПК, положите туда файл <code>index.html</code>.</li>
+                                <li>Загрузите эту папку в новый репозиторий на <a href="https://github.com" target="_blank" class="text-amber-500 hover:underline">GitHub</a>.</li>
+                                <li>Зайдите на <a href="https://vercel.com" target="_blank" class="text-amber-500 hover:underline">Vercel.com</a> → <b>Add New Project</b>.</li>
+                                <li>Нажмите <b>Import</b> напротив вашего репозитория.</li>
+                                <li>Нажмите <b>Deploy</b>. Настройки сборки менять не нужно.</li>
+                            </ol>
+                            
+                            <div class="mt-3 pt-3 border-t border-slate-700/50">
+                                <p class="text-xs font-bold mb-1 text-slate-400">Нужен vercel.json?</p>
+                                <p class="text-[10px] text-slate-500 mb-2">Если хотите, чтобы работали красивые ссылки (без .html), создайте файл <code>vercel.json</code> рядом с index.html:</p>
+                                <code class="block bg-slate-950 p-2 rounded border border-slate-800 text-[10px] font-mono text-green-400 whitespace-pre-wrap">{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }</code>
+                            </div>
+                        </div>
+
+                        <!-- Netlify Option (Fastest) -->
+                        <div class="bg-slate-800/30 p-4 rounded-lg border border-slate-700/30 text-sm text-slate-300">
+                            <div class="flex items-center gap-2 mb-2 font-bold text-slate-200">
+                                <i class="fas fa-bolt"></i> Netlify Drop (Быстро)
+                            </div>
+                            <ol class="list-decimal list-inside space-y-1 ml-1 text-slate-400 text-xs">
+                                <li>Сохраните сайт (<strong class="text-slate-200 bg-slate-700 px-1 rounded">Ctrl+S</strong>) как <code>index.html</code>.</li>
+                                <li>Перетащите файл на <a href="https://app.netlify.com/drop" target="_blank" class="text-amber-500 hover:underline">Netlify Drop</a>.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -537,7 +578,14 @@
                     }
                     app.showNotification(`Добро пожаловать, ${nick}!`, 'success');
                 } catch (err) {
-                    app.showNotification(err.message, 'error');
+                    console.error(err);
+                    if (err.code === 'auth/operation-not-allowed') {
+                        app.showNotification('Ошибка: Включите "Email/Password" в Firebase Console!', 'error');
+                    } else if (err.code === 'auth/configuration-not-found') {
+                        app.showNotification('Ошибка конфига. Попробуйте нажать "Сбросить" в настройках.', 'error');
+                    } else {
+                        app.showNotification(err.message, 'error');
+                    }
                 }
             },
 
@@ -565,7 +613,16 @@
                     }
                     app.showNotification('Вы успешно вошли', 'success');
                 } catch (err) {
-                    app.showNotification('Ошибка входа: ' + err.message, 'error');
+                    console.error(err);
+                    if (err.code === 'auth/operation-not-allowed') {
+                        app.showNotification('Ошибка: Включите "Email/Password" в Firebase Console!', 'error');
+                    } else if (err.code === 'auth/configuration-not-found') {
+                        app.showNotification('Ошибка конфига. Сбросьте настройки (значок огня -> мусорка).', 'error');
+                    } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                        app.showNotification('Неверный email или пароль', 'error');
+                    } else {
+                        app.showNotification('Ошибка входа: ' + err.message, 'error');
+                    }
                 }
             },
 
@@ -1068,7 +1125,7 @@
                 const txt = document.getElementById('firebase-config-json').value;
                 try {
                     const json = JSON.parse(txt);
-                    localStorage.setItem('grand_market_fb_config', JSON.stringify(json));
+                    localStorage.setItem('grand_market_fb_config_v2', JSON.stringify(json));
                     app.showNotification('Конфигурация сохранена. Перезагрузка...', 'success');
                     setTimeout(() => window.location.reload(), 1500);
                 } catch (e) {
@@ -1077,7 +1134,7 @@
             },
 
             clearFirebaseConfig: () => {
-                localStorage.removeItem('grand_market_fb_config');
+                localStorage.removeItem('grand_market_fb_config_v2');
                 app.showNotification('Настройки сброшены. Перезагрузка...', 'info');
                 setTimeout(() => window.location.reload(), 1000);
             }
